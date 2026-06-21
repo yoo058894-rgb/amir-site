@@ -4,134 +4,137 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>System</title>
+<title>System Terminal</title>
 
-<!-- فونت ترمینال -->
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Share Tech Mono', monospace;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Share Tech Mono', monospace;
 }
 
-body {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: black;
-    overflow: hidden;
-    color: #00ff66;
+body{
+  background:black;
+  color:#00ff66;
+  height:100vh;
+  overflow:hidden;
 }
 
-/* پس‌زمینه نویزی */
-body::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0,255,102,0.05),
-        rgba(0,255,102,0.05) 1px,
-        transparent 1px,
-        transparent 3px
-    );
-    animation: scan 6s linear infinite;
+/* scan lines */
+body::before{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(0,255,102,0.05),
+    rgba(0,255,102,0.05) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  animation:scan 6s linear infinite;
 }
 
-@keyframes scan {
-    from { transform: translateY(0); }
-    to { transform: translateY(-100px); }
+@keyframes scan{
+  from{transform:translateY(0);}
+  to{transform:translateY(-120px);}
 }
 
-/* کارت */
-.container {
-    text-align: center;
-    z-index: 2;
+/* glitch overlay */
+.glitch{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:black;
+  opacity:0;
+  animation:flash 7s infinite;
+  z-index:999;
 }
 
-/* glitch text */
-h1 {
-    font-size: 50px;
-    position: relative;
-    animation: flicker 2s infinite;
+@keyframes flash{
+  0%,94%,100%{opacity:0;}
+  95%{opacity:1;}
+  96%{opacity:0;}
 }
 
-h1::before,
-h1::after {
-    content: "COMING SOON";
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    overflow: hidden;
+/* terminal box */
+.terminal{
+  position:relative;
+  z-index:2;
+  padding:20px;
+  font-size:14px;
+  line-height:1.6;
+  height:100vh;
+  overflow:hidden;
 }
 
-h1::before {
-    color: #00ff66;
-    transform: translateX(2px);
-    animation: glitch 0.3s infinite;
+.title{
+  font-size:28px;
+  margin-bottom:10px;
+  animation:flicker 2s infinite;
 }
 
-h1::after {
-    color: #003b1a;
-    transform: translateX(-2px);
-    animation: glitch 0.25s infinite;
+@keyframes flicker{
+  0%,100%{opacity:1;}
+  50%{opacity:0.6;}
 }
 
-@keyframes glitch {
-    0% { clip-path: inset(0 0 90% 0); }
-    25% { clip-path: inset(10% 0 60% 0); }
-    50% { clip-path: inset(80% 0 5% 0); }
-    75% { clip-path: inset(30% 0 40% 0); }
-    100% { clip-path: inset(0 0 0 0); }
+.line{
+  opacity:0;
+  animation:show 0.5s forwards;
 }
 
-@keyframes flicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-/* زیر متن */
-p {
-    margin-top: 15px;
-    opacity: 0.8;
-    animation: flicker 3s infinite;
-}
-
-/* blackout لحظه‌ای */
-.blackout {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background: black;
-    top: 0;
-    left: 0;
-    z-index: 999;
-    opacity: 0;
-    pointer-events: none;
-    animation: blackout 8s infinite;
-}
-
-@keyframes blackout {
-    0%, 95%, 100% { opacity: 0; }
-    96%, 98% { opacity: 1; }
+@keyframes show{
+  to{opacity:1;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="blackout"></div>
+<div class="glitch"></div>
 
-<div class="container">
-    <h1>COMING SOON</h1>
-    <p>system unstable...</p>
+<div class="terminal">
+  <div class="title">SYSTEM TERMINAL v3.7</div>
+  <div id="log"></div>
 </div>
+
+<script>
+const logs = [
+"Booting system...",
+"Loading kernel modules...",
+"Bypassing security layers...",
+"Establishing encrypted tunnel...",
+"Injecting payload...",
+"Accessing core directory...",
+"WARNING: firewall unstable",
+"TRACE DISABLED",
+"ROOT ACCESS GRANTED",
+"Welcome user..."
+];
+
+let i = 0;
+const logBox = document.getElementById("log");
+
+function addLine(){
+  if(i >= logs.length) return;
+
+  const div = document.createElement("div");
+  div.className = "line";
+  div.textContent = "> " + logs[i];
+
+  logBox.appendChild(div);
+
+  i++;
+  setTimeout(addLine, 700);
+}
+
+addLine();
+</script>
 
 </body>
 </html>
