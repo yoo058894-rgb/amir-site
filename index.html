@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>System Terminal</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -44,24 +43,52 @@ body::before{
   to{transform:translateY(-120px);}
 }
 
-/* glitch overlay */
-.glitch{
+/* RED ALERT */
+.alert{
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:red;
+  z-index:999;
+  opacity:0;
+  pointer-events:none;
+}
+
+.alert.active{
+  animation:alertFlash 4s forwards;
+}
+
+@keyframes alertFlash{
+  0%{opacity:0;}
+  10%{opacity:0.9;}
+  20%{opacity:0.2;}
+  40%{opacity:0.8;}
+  60%{opacity:0.3;}
+  100%{opacity:0;}
+}
+
+/* BLACKOUT */
+.blackout{
   position:fixed;
   width:100%;
   height:100%;
   background:black;
+  z-index:1000;
   opacity:0;
-  animation:flash 7s infinite;
-  z-index:999;
+  pointer-events:none;
 }
 
-@keyframes flash{
-  0%,94%,100%{opacity:0;}
-  95%{opacity:1;}
-  96%{opacity:0;}
+.blackout.active{
+  animation:blackoutAnim 1s forwards;
 }
 
-/* terminal box */
+@keyframes blackoutAnim{
+  0%{opacity:0;}
+  50%{opacity:1;}
+  100%{opacity:1;}
+}
+
+/* TERMINAL */
 .terminal{
   position:relative;
   z-index:2;
@@ -69,39 +96,66 @@ body::before{
   font-size:14px;
   line-height:1.6;
   height:100vh;
-  overflow:hidden;
 }
 
 .title{
-  font-size:28px;
+  font-size:26px;
   margin-bottom:10px;
   animation:flicker 2s infinite;
 }
 
 @keyframes flicker{
   0%,100%{opacity:1;}
-  50%{opacity:0.6;}
+  50%{opacity:0.5;}
 }
 
 .line{
   opacity:0;
-  animation:show 0.5s forwards;
+  animation:show 0.3s forwards;
 }
 
 @keyframes show{
   to{opacity:1;}
+}
+
+/* FINAL GLITCH TEXT */
+.final{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:48px;
+  color:#00ff66;
+  display:none;
+  letter-spacing:3px;
+  z-index:2000;
+}
+
+.final.glitch{
+  animation:glitch 0.2s infinite;
+}
+
+@keyframes glitch{
+  0%{transform:translate(-50%,-50%) skew(0deg);}
+  20%{transform:translate(-48%,-52%) skew(5deg);}
+  40%{transform:translate(-52%,-50%) skew(-5deg);}
+  60%{transform:translate(-50%,-48%) skew(3deg);}
+  100%{transform:translate(-50%,-50%) skew(0deg);}
 }
 </style>
 </head>
 
 <body>
 
-<div class="glitch"></div>
+<div class="alert" id="alert"></div>
+<div class="blackout" id="blackout"></div>
 
-<div class="terminal">
-  <div class="title">SYSTEM TERMINAL v3.7</div>
+<div class="terminal" id="terminal">
+  <div class="title">SYSTEM TERMINAL v5.0</div>
   <div id="log"></div>
 </div>
+
+<div class="final" id="finalText"></div>
 
 <script>
 const logs = [
@@ -121,7 +175,10 @@ let i = 0;
 const logBox = document.getElementById("log");
 
 function addLine(){
-  if(i >= logs.length) return;
+  if(i >= logs.length){
+    triggerAlert();
+    return;
+  }
 
   const div = document.createElement("div");
   div.className = "line";
@@ -130,7 +187,71 @@ function addLine(){
   logBox.appendChild(div);
 
   i++;
-  setTimeout(addLine, 700);
+  setTimeout(addLine, 500);
+}
+
+/* 🔊 error sound */
+function playBeep(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "square";
+  osc.frequency.setValueAtTime(120, ctx.currentTime);
+
+  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start();
+  osc.stop(ctx.currentTime + 0.2);
+}
+
+/* RED ALERT */
+function triggerAlert(){
+  playBeep();
+
+  const alert = document.getElementById("alert");
+  alert.classList.add("active");
+
+  setTimeout(() => {
+    triggerBlackout();
+  }, 4000);
+}
+
+/* BLACKOUT 1s */
+function triggerBlackout(){
+  const blackout = document.getElementById("blackout");
+  const terminal = document.getElementById("terminal");
+
+  blackout.classList.add("active");
+
+  setTimeout(() => {
+    terminal.style.display = "none";
+    showFinal();
+  }, 1000);
+}
+
+/* FINAL GLITCH TEXT */
+function showFinal(){
+  const text = "COMING SOON";
+  const el = document.getElementById("finalText");
+
+  el.style.display = "block";
+  el.classList.add("glitch");
+
+  let i = 0;
+
+  function type(){
+    if(i < text.length){
+      el.textContent += text[i];
+      i++;
+      setTimeout(type, 120);
+    }
+  }
+
+  type();
 }
 
 addLine();
